@@ -17,6 +17,19 @@
 
 8. Edit ***init.sqf*** with notepad++
 
+	Find:
+
+	```sqf
+	waitUntil {scriptDone progress_monitor};	
+	```
+	
+	And add the following line ***above*** it: 
+	
+	```sqf
+	[] execVM "dayz_code\compile\remote_message.sqf";
+	```
+	If you already have ZSC or WAI installed then just verify that this line is already there.
+
 	Find this line:
 	
 	```sqf
@@ -41,7 +54,8 @@
 	EpochEvents = [["any","any","any","any",0,"building_supplies"],["any","any","any","any",15,"pirate_treasure"],["any","any","any","any",30,"special_forces"],["any","any","any","any",45,"un_supply"]];
 	```
 	
-9. Repack your mission PBO
+9. Copy the dayz_code folder over to your mission folder.
+10. Repack your mission folder into a PBO.
 
 Configuration Notes:
 1. At the top of each file you will find a section that looks like this:
