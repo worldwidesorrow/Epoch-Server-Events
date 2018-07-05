@@ -80,12 +80,13 @@ _lootBox addBackpackCargoGlobal [_backpack,1];
 
 if (_messageType == "Hint") then {
 	_image = getText (configFile >> "CfgWeapons" >> "UK59_DZ" >> "picture");
-	_hint = parseText format["<t align='center' color='#FF0000' shadow='2' size='1.75'>Military Crate</t><br/><img size='4' align='Center' image='%1'/><br/><t align='center' color='#ffffff'>A special forces unit lost a crate full of weapons!</t>",_image];
-	RemoteMessage = ["hint", _hint];
-	publicVariable "RemoteMessage";
+	_hint = "STR_CL_ESE_MILITARY_HINT";
+	RemoteMessage = ["hint", _hint, [_image]];
 } else {
-	[nil,nil,rTitleText,"A special forces unit lost a crate full of weapons!", "PLAIN",10] call RE;
+	_message = "STR_CL_ESE_MILITARY";
+	RemoteMessage = ["titleText",_message];
 };
+publicVariable "RemoteMessage";
 
 if (_debug) then {diag_log format["Special Forces Event setup, waiting for %1 minutes", _timeout];};
 
