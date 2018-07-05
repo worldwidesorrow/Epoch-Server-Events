@@ -105,10 +105,12 @@ while {!_finished} do {
 	_eventMarker setMarkerAlpha 0.5;
 	_eventMarker setMarkerSize [(_markerRadius + 50), (_markerRadius + 50)];
 	
-	_crateMarker = createMarker [ format ["loot_event_crateMarker_%1", _startTime], _lootPos];
-	_crateMarker setMarkerShape "ICON";
-	_crateMarker setMarkerType "mil_dot";
-	_crateMarker setMarkerColor "ColorRed";
+	if (_markPosition) then {
+		_crateMarker = createMarker [ format ["loot_event_crateMarker_%1", _startTime], _lootPos];
+		_crateMarker setMarkerShape "ICON";
+		_crateMarker setMarkerType "mil_dot";
+		_crateMarker setMarkerColor "ColorRed";
+	};
 	
 	if (_visitMark) then {
 		{if (isPlayer _x && _x distance _lootBox <= _visitDistance && !_visitedCrate) then {_visitedCrate = true};} count playableUnits;
