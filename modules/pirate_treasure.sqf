@@ -71,12 +71,13 @@ _lootBox addBackpackCargoGlobal [_backpack,1];
 
 if (_messageType == "Hint") then {
 	_image = (getText (configFile >> "CfgMagazines" >> "ItemRuby" >> "picture"));
-	_hint = parseText format["<t align='center' color='#FFFF66' shadow='2' size='1.75'>Treasure Crate</t><br/><img size='4' align='Center' image='%1'/><br/><t align='center' color='#ffffff'>Pirates have hidden their treasure in a crate!</t>",_image];
-	RemoteMessage = ["hint", _hint];
-	publicVariable "RemoteMessage";
+	_hint = "STR_CL_ESE_TREASURE_HINT";
+	RemoteMessage = ["hint", _hint, [_image]];
 } else {
-	[nil,nil,rTitleText,"Pirates have hidden their treasure in a crate!", "PLAIN",10] call RE;
+	_message = "STR_CL_ESE_TREASURE";
+	RemoteMessage = ["titleText",_message];
 };
+publicVariable "RemoteMessage";
 
 if (_debug) then {diag_log format["Pirate Treasure event setup, waiting for %1 minutes", _timeout];};
 
