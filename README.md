@@ -55,10 +55,11 @@
 	```
 	
 9. Copy the ***dayz_code*** folder over to your mission folder.
-10. Repack your mission folder into a PBO.
+10. This mod is dependent on the Epoch community stringtable. Download the stringtable ***[here](https://github.com/oiad/communityLocalizations/)*** and place file stringTable.xml in the root of your mission folder.
+11. Repack your mission PBO.
 
 Configuration Notes:
-1. At the top of each file you will find a section that looks like this:
+At the top of each file you will find a section that looks like this:
 
   ```sqf
   _spawnChance =  1; // Percentage chance of event happening.The number must be between 0 and 1. 1 = 100% chance.
