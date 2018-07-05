@@ -4,28 +4,24 @@ fnc_remote_message = {
 	_type = _this select 0;
 	_message = _this select 1;
 	
-	call
-	{
-		if (typeName _message == "STRING") exitWith {
-			if (["STR_", _message] call fnc_inString) then {
-				if ((count _this) > 2) then {
-					_params = _this select 2;
+	if (typeName _message == "STRING") then {
+		if (["STR_", _message] call fnc_inString) then {
+			if ((count _this) > 2) then {
+				_params = _this select 2;
+				if (_type == "hint") then {
+					_message = parseText format ([localize _message] + _params);
+				} else {
 					_message = format ([localize _message] + _params);
+				};
+			} else {
+				if (_type == "hint") then {
+					_message = parseText localize _message;
 				} else {
 					_message = localize _message;
 				};
 			};
 		};
-		if (typeName _message == "TEXT") exitWith {
-			if (["STR_", str _message] call fnc_inString) then {
-				if ((count _this) > 2) then {
-					_params = _this select 2;
-					_message = format ([localize _message] + _params);
-				} else {
-					_message = localize _message;
-				};
-			};
-		};
+	} else {
 		{
 			if (["STR_", _x] call fnc_inString) then {
 				if ((count _this) > 2) then {
@@ -36,8 +32,6 @@ fnc_remote_message = {
 				};
 			};
 		} forEach _message;
-		
-		
 	};
 	
 	if (_type == "radio") exitWith {
