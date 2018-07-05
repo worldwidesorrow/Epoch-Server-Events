@@ -72,12 +72,13 @@ for "_i" from 1 to _lootAmount do {
 
 if (_messageType == "Hint") then {
 	_image = (getText (configFile >> "CfgVehicles" >> "UralCivil_DZE" >> "picture"));
-	_hint = parseText format["<t align='center' color='#00FF11' shadow='2' size='1.75'>Construction Crate</t><br/><img size='4' align='Center' image='%1'/><br/><t align='center' color='#ffffff'>IKEA truck lost its Cargo!</t>",_image];
-	RemoteMessage = ["hint", _hint];
-	publicVariable "RemoteMessage";
+	_hint = "STR_CL_ESE_IKEA_HINT";
+	RemoteMessage = ["hint", _hint, [_image]];
 } else {
-	[nil,nil,rTitleText,"IKEA truck lost its Cargo!", "PLAIN",10] call RE;
+	_message = "STR_CL_ESE_IKEA";
+	RemoteMessage = ["titleText",_message];
 };
+publicVariable "RemoteMessage";
 
 if (_debug) then {diag_log format["IKEA Event setup, event will end in %1 minutes", _timeout];};
 
