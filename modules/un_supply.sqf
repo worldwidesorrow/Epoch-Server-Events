@@ -72,12 +72,13 @@ _lootBox addBackpackCargoGlobal [_backpack,1];
 
 if (_messageType == "Hint") then {
 	 _image = (getText (configFile >> "CfgVehicles" >> "Mi17_UN_CDF_EP1" >> "picture"));
-	_hint = parseText format["<t align='center' color='#0D00FF' shadow='2' size='1.75'>Supply Crate</t><br/><img size='4' align='Center' image='%1'/><br/><t align='center' color='#ffffff'>UN Agency drops life-saving supplies for Survivors!</t>",_image];
-	RemoteMessage = ["hint", _hint];
-	publicVariable "RemoteMessage";
+	 _hint = "STR_CL_ESE_UNSUPPLY_HINT";
+	RemoteMessage = ["hint", _hint, [_image]];
 } else {
-	[nil,nil,rTitleText,"UN Agency drops life-saving supplies for Survivors!", "PLAIN",10] call RE;
+	_message = "STR_CL_ESE_UNSUPPLY";
+	RemoteMessage = ["titleText",_message];
 };
+publicVariable "RemoteMessage";
 
 if (_debug) then {diag_log format["U.N. Supply Drop Event setup, waiting for %1 minutes", _timeout];};
 
