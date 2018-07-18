@@ -8,11 +8,12 @@
 _spawnChance =  1; // Percentage chance of event happening.The number must be between 0 and 1. 1 = 100% chance.
 _gemChance = .25; // Chance that a gem will be added to the crate. The number must be between 0 and 1. 1 = 100% chance.
 _markerRadius = 350; // Radius the loot can spawn and used for the marker
-_timeout = 20; // Time it takes for the event to time out (in minutes).
+_timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
 _debug = false; // Puts a marker exactly were the loot spawns
+_nameMarker = false; // Center marker with the name of the mission.
 _markPosition = false; // Puts a marker exactly were the loot spawns.
 _lootAmount = 5; // This is the number of times a random loot selection is made.
-_messageType = "Hint"; // Type of announcement message. Options "Hint","TitleText". Warning: Hint requires that you have remote_messages.sqf installed.
+_messageType = "TitleText"; // Type of announcement message. Options "Hint","TitleText". ***Warning: Hint appears in the same screen space as common debug monitors
 _visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the crate.
 _visitDistance = 20; // Distance from crate before crate is considered "visited"
 _crate = "GuerillaCacheBox";
@@ -85,6 +86,7 @@ _startTime = diag_tickTime;
 _eventMarker = "";
 _crateMarker = "";
 _visitMarker = "";
+_textMarker = "";
 _finished = false;
 _visitedCrate = false;
 _playerNear = true;
@@ -97,11 +99,19 @@ while {!_finished} do {
 	_eventMarker setMarkerAlpha 0.5;
 	_eventMarker setMarkerSize [(_markerRadius + 50), (_markerRadius + 50)];
 	
+	if (_nameMarker) then {
+		_textMarker = createMarker [format["loot_text_marker_%1",_startTime],_position];
+		_textMarker setMarkerShape "ICON";
+		_textMarker setMarkerType "mil_dot";
+		_textMarker setMarkerColor "ColorBlack";
+		_textMarker setMarkerText "Pirate Treasure";
+	};
+	
 	if (_markPosition) then {
-	_crateMarker = createMarker [ format ["loot_event_crateMarker_%1", _startTime], _lootPos];
-	_crateMarker setMarkerShape "ICON";
-	_crateMarker setMarkerType "mil_dot";
-	_crateMarker setMarkerColor "ColorYellow";
+		_crateMarker = createMarker [ format ["loot_event_crateMarker_%1", _startTime], _lootPos];
+		_crateMarker setMarkerShape "ICON";
+		_crateMarker setMarkerType "mil_dot";
+		_crateMarker setMarkerColor "ColorYellow";
 	};
 	
 	if (_visitMark) then {
@@ -109,7 +119,7 @@ while {!_finished} do {
 	
 		// Add the visit marker to the center of the mission
 		if (_visitedCrate) then {
-			_visitMarker = createMarker [ format ["loot_event_visitMarker_%1", _startTime], _position];
+			_visitMarker = createMarker [ format ["loot_event_visitMarker_%1", _startTime], [(_position select 0), (_position select 1) + 25]];
 			_visitMarker setMarkerShape "ICON";
 			_visitMarker setMarkerType "hd_pickup";
 			_visitMarker setMarkerColor "ColorBlack";
@@ -119,11 +129,14 @@ while {!_finished} do {
 	uiSleep 1;
 	
 	deleteMarker _eventMarker;
+	if !(isNil "_textMarker") then {deleteMarker _textMarker;};
 	if !(isNil "_crateMarker") then {deleteMarker _crateMarker;};
 	if !(isNil "_visitMarker") then {deleteMarker _visitMarker;}; 
 	
-	if (diag_tickTime - _startTime >= _timeout*60) then {
-		_finished = true;
+	if (_timeout != -1) then {
+		if (diag_tickTime - _startTime >= _timeout*60) then {
+			_finished = true;
+		};
 	};
 };
 
