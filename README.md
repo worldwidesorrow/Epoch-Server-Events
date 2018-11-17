@@ -55,7 +55,7 @@
 	```sqf
 	EpochEvents = [["any","any","any","any",0,"building_supplies"],["any","any","any","any",15,"pirate_treasure"],["any","any","any","any",30,"special_forces"],["any","any","any","any",45,"un_supply"]];
 	```
-	Or you can call the event_init function and let it select a random mission.
+	Or you can call the event_init function and let it select a random mission. If you are not running all of the events, then open event_init.sqf and comment out the line that corresponds with the mission in the array. The last line should not have a comma behind it.
 	
 	```sqf
 	EpochEvents = [["any","any","any","any",0,"event_init"],["any","any","any","any",15,"event_init"],["any","any","any","any",30,"event_init"],["any","any","any","any",45,"event_init"]];
