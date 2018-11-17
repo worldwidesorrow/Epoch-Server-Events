@@ -1,6 +1,6 @@
 # Epoch-Server-Events
 
-- These DayZ Epoch Server events were originally created by ***[Aidem](https://epochmod.com/forum/topic/3779-4-types-of-side-missions-events/)***
+- These DayZ Epoch Server events were originally created by ***[Aidem](https://epochmod.com/forum/topic/3779-4-types-of-side-missions-events/)*** , ***[Caveman](https://epochmod.com/forum/topic/36351-new-event-labyrinth/)*** , and ***[Cramps](https://epochmod.com/forum/topic/9660-player-safe-reset-mission/)***
 - I have updated them to work with DayZ Epoch 1.0.6+
 - Includes the optional visited check mark concept by ***[Payden](https://epochmod.com/forum/topic/44197-crate-visited-marker-for-non-ai-missions/)***
 
