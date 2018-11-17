@@ -29,6 +29,8 @@
 	[] execVM "dayz_code\compile\remote_message.sqf";
 	```
 	If you already have ZSC or WAI installed then just verify that this line is already there.
+	
+	There is an optional file called event_init.sqf which can be called to choose a random mission and cycle all of the missions before repeats. Otherwise you can call the events individually.
 
 	Find this line:
 	
@@ -53,6 +55,10 @@
 	```sqf
 	EpochEvents = [["any","any","any","any",0,"building_supplies"],["any","any","any","any",15,"pirate_treasure"],["any","any","any","any",30,"special_forces"],["any","any","any","any",45,"un_supply"]];
 	```
+	Or you can call the event_init function and let it select a random mission.
+	
+	```sqf
+	EpochEvents = [["any","any","any","any",0,"event_init"],["any","any","any","any",15,"event_init"],["any","any","any","any",30,"event_init"],["any","any","any","any",45,"event_init"]];
 	
 9. Copy the ***dayz_code*** folder over to your mission folder.
 10. This mod is dependent on the Epoch community stringtable. Download the stringtable ***[here](https://github.com/oiad/communityLocalizations/)*** and place file stringTable.xml in the root of your mission folder.
