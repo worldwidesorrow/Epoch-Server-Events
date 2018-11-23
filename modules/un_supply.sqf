@@ -72,7 +72,7 @@ _box addBackpackCargoGlobal [_pack,1];
 
 if (_type == "Hint") then {
 	_img = (getText (configFile >> "CfgVehicles" >> "Mi17_UN_CDF_EP1" >> "picture"));
-	RemoteMessage = ["event_hint",["STR_CL_ESE_UNSUPPLY_TITLE","STR_CL_ESE_UNSUPPLY"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_UNSUPPLY_TITLE","STR_CL_ESE_UNSUPPLY"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_UNSUPPLY"];
 };

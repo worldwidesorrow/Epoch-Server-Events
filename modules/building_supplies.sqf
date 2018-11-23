@@ -74,7 +74,7 @@ _box addBackpackCargoGlobal [_pack,1];
 
 if (_type == "Hint") then {
 	_img = (getText (configFile >> "CfgVehicles" >> "UralCivil_DZE" >> "picture"));
-	RemoteMessage = ["event_hint",["STR_CL_ESE_IKEA_TITLE","STR_CL_ESE_IKEA"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_IKEA_TITLE","STR_CL_ESE_IKEA"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_IKEA"];
 };

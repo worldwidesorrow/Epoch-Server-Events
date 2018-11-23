@@ -39,7 +39,7 @@ if (_debug) then {diag_log format["Total abandoned safes on server = %1",count _
 
 if (_type == "Hint") then {
 	_img = (getText (configFile >> "CfgMagazines" >> "ItemVault" >> "picture"));
-	RemoteMessage = ["event_hint",["STR_CL_ESE_VAULT_TITLE","STR_CL_ESE_VAULT"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_VAULT_TITLE","STR_CL_ESE_VAULT"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_VAULT"];
 };

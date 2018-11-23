@@ -70,7 +70,7 @@ _crate addBackpackCargoGlobal [_pack,1];
 
 if (_type == "Hint") then {
 	_img = (getText (configFile >> "CfgMagazines" >> "ItemRuby" >> "picture"));
-	RemoteMessage = ["event_hint",["STR_CL_ESE_TREASURE_TITLE","STR_CL_ESE_TREASURE"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_TREASURE_TITLE","STR_CL_ESE_TREASURE"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_TREASURE"];
 };

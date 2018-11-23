@@ -6,7 +6,7 @@
 
 private ["_spawnChance","_chainsawChance","_radius","_debug","_nameMarker","_timeout","_markPos","_lootAmount","_messageType","_visitMark","_wepAmount","_lootPos","_runover","_type",
 "_visitDistance","_crate","_weapons","_lootList","_position","_box","_attachments","_attachment","_bloodbag","_posarray","_spawnObjects","_clutter","_saw",
-"_time","_marker","_pMarker","_vMarker","_dot","_finished","_visited","_isNear","_magazine","_ammoArray","_weapon","_attach","_cfg","_loot","_backpack","_img"];
+"_time","_marker","_pMarker","_vMarker","_dot","_finished","_visited","_isNear","_magazine","_ammoArray","_weapon","_attach","_cfg","_loot","_backpack"];
 
 _spawnChance =  1; // Percentage chance of event happening.The number must be between 0 and 1. 1 = 100% chance.
 _chainsawChance = .5; // Chance that a chainsaw with mixed gas will be added to the crate. The number must be between 0 and 1. 1 = 100% chance.
@@ -23,7 +23,6 @@ _visitDistance = 20; // Distance from crate before crate is considered "visited"
 _crate = "GuerillaCacheBox";
 #define TITLE_COLOR "#ff9933" // Hint Option: Color of Top Line
 #define TITLE_SIZE "1.75" // Hint Option: Size of top line
-#define IMAGE_SIZE "0" // Hint Option: Size of the image
 
 _bloodbag = if(dayz_classicBloodBagSystem) then {"ItemBloodbag";} else {"bloodBagONEG";};
 
@@ -157,9 +156,7 @@ _backpack = DayZ_Backpacks call dz_fn_array_selectRandom;
 _box addBackpackCargoGlobal [_backpack,1];
 
 if (_messageType == "Hint") then {
-	//_img = (getText (configFile >> "CfgVehicles" >> "MAP_HouseBlock_C1_ruins" >> "icon")); // Doesn't work need to find a new image or icon
-	_img = "";
-	RemoteMessage = ["event_hint",["STR_CL_ESE_RUBBLETOWN_TITLE","STR_CL_ESE_RUBBLETOWN"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintNoImage",["STR_CL_ESE_RUBBLETOWN_TITLE","STR_CL_ESE_RUBBLETOWN"],[TITLE_COLOR,TITLE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_RUBBLETOWN"];
 };

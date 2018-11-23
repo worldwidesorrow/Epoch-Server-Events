@@ -82,7 +82,7 @@ _box addBackpackCargoGlobal [_pack,1];
 
 if (_type == "Hint") then {
 	_img = getText (configFile >> "CfgWeapons" >> "UK59_DZ" >> "picture");
-	RemoteMessage = ["event_hint",["STR_CL_ESE_MILITARY_TITLE","STR_CL_ESE_MILITARY"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_MILITARY_TITLE","STR_CL_ESE_MILITARY"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_MILITARY"];
 };

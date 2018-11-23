@@ -136,7 +136,7 @@ _box addBackpackCargoGlobal [_pack,1];
 
 if (_messageType == "Hint") then {
 	_img = (getText (configFile >> "CfgVehicles" >> "Land_MBG_Shoothouse_1" >> "icon"));
-	RemoteMessage = ["event_hint",["STR_CL_ESE_LABYRINTH_TITLE","STR_CL_ESE_LABYRINTH"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
+	RemoteMessage = ["hintWithImage",["STR_CL_ESE_LABYRINTH_TITLE","STR_CL_ESE_LABYRINTH"],[_img,TITLE_COLOR,TITLE_SIZE,IMAGE_SIZE]];
 } else {
 	RemoteMessage = ["titleText","STR_CL_ESE_LABYRINTH"];
 };
