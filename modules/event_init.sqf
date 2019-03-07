@@ -9,7 +9,8 @@ if (isNil "Server_Events_Array") then {
 		"un_supply",
 		"labyrinth",
 		"rubble_town",
-		"abandoned_vaults"
+		"abandoned_vaults",
+		"fuelstationbomb"
 	];
 };
 
