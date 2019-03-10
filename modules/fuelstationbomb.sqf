@@ -4,12 +4,12 @@
 	Last edited 3-6-2019
 */
 
-private ["_random","_pos"];
+private ["_random","_pos","_vMarker"];
 
 _timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
 _delay = 2; // This is the time in minutes it will take for the explosion to occur after announcement
 _lowerGrass = true; // remove grass underneath loot so it is easier to find small objects
-_visitMark = false; // Places a "visited" check mark on the mission if a player gets within range of the vehicle.
+_visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the vehicle.
 _distance = 20; // Distance from vehicle before event is considered "visited"
 
 // You can adjust these loot selections to your liking. Must be magazine/item slot class name, not weapon or tool belt.
@@ -105,7 +105,13 @@ while {!_done} do {
 	_dot setMarkerText "Fuel Station Explosion";
 	
 	if (_visitMark) then {
-		{if (isPlayer _x && _x distance _pos <= _distance && !_visited) then {_visited = true};} count playableUnits;
+		if (!_visited) then {
+			{
+				if (isPlayer _x && _x distance _pos <= _distance) then {
+					_visited = true;
+				};
+			} count playableUnits;
+		};
 	
 		if (_visited) then {
 			_vMarker = createMarker ["fuelVmarker" + str _time, [(_pos select 0), (_pos select 1) + 25]];
