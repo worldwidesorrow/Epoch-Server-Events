@@ -139,16 +139,10 @@ for "_i" from 1 to _wepAmount do {
 		_box addMagazineCargoGlobal [_magazine, (3 + round(random 2))];
 	};
 	
-	_cfg = configFile >> "CfgWeapons" >> _weapon >> "Attachments";
-	if (isClass _cfg && (count _cfg) > 0) then {
-		_attachments = [];
-		for "_i" from 0 to (count _cfg)-1 do {
-			_attach = _cfg select _i;
-			_type = configName _attach;
-			_attachments set [count _attachments,_type];
-		};
-		_attachment = _attachments call dz_fn_array_selectRandom;
-		_box addMagazineCargoGlobal [_attachment,1];
+	_cfg = configFile >> "CfgWeapons" >> _wep >> "Attachments";
+	if (isClass _cfg && count _cfg > 0) then {
+		_attach = configName (_cfg call dz_fn_array_selectRandom);
+		_box addMagazineCargoGlobal [_attach,1];
 	};
 };
 
