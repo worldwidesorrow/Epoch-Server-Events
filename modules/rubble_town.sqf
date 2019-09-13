@@ -139,7 +139,7 @@ for "_i" from 1 to _wepAmount do {
 		_box addMagazineCargoGlobal [_magazine, (3 + round(random 2))];
 	};
 	
-	_cfg = configFile >> "CfgWeapons" >> _wep >> "Attachments";
+	_cfg = configFile >> "CfgWeapons" >> _weapon >> "Attachments";
 	if (isClass _cfg && count _cfg > 0) then {
 		_attach = configName (_cfg call dz_fn_array_selectRandom);
 		_box addMagazineCargoGlobal [_attach,1];
