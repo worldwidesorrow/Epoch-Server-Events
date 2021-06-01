@@ -12,57 +12,51 @@
 4. Navigate to the new ***dayz_server*** folder and copy the ***modules*** folder into this directory.
 5. Open each of the files and make adjustments to the configuration variables at the top to meet your preferences.
 6. Save the file and repack your server PBO
-
 7. Unpack your mission PBO
+8. Edit ***init.sqf***
 
-8. Edit ***init.sqf*** with notepad++
-
-	Find:
-
+	Find this block of code:
+	
 	```sqf
-	waitUntil {scriptDone progress_monitor};	
+	EpochEvents = [ //[year,month,day of month, minutes,name of file - .sqf] If minutes is set to -1, the event will run once immediately after server start.
+		//["any","any","any","any",-1,"Infected_Camps"], // (negatively impacts FPS)
+		["any","any","any","any",-1,"Care_Packages"],
+		["any","any","any","any",-1,"CrashSites"]
+	];
 	```
 	
-	And add the following line ***above*** it: 
+	Option 1: Add entries to spawn random events with the event_init function:
 	
 	```sqf
-	[] execVM "dayz_code\compile\remote_message.sqf";
-	```
-	If you already have ZSC or WAI installed then just verify that this line is already there.
-	
-	There is an optional file called event_init.sqf which can be called to choose a random mission and cycle all of the missions before repeats. Otherwise you can call the events individually.
-
-	Find this line:
-	
-	```sqf
-	EpochUseEvents = false;
-	```
-	
-	Change it to true, if not already:
-	
-	```sqf
-	EpochUseEvents = true;
+	EpochEvents = [ //[year,month,day of month, minutes,name of file - .sqf] If minutes is set to -1, the event will run once immediately after server start.
+		//["any","any","any","any",-1,"Infected_Camps"], // (negatively impacts FPS)
+		["any","any","any","any",-1,"Care_Packages"],
+		["any","any","any","any",-1,"CrashSites"],
+		["any","any","any","any",0,"event_init"],
+		["any","any","any","any",15,"event_init"],
+		["any","any","any","any",30,"event_init"],
+		["any","any","any","any",45,"event_init"]
+	];
 	```
 	
-	Find this line right below:
+	This will spawn a random event every 15 minutes.
+	
+	Option 2: Add entries to spawn individual events like this:
 	
 	```sqf
-	EpochEvents = [["any","any","any","any",30,"crash_spawner"],["any","any","any","any",0,"crash_spawner"],["any","any","any","any",15,"supply_drop"]];
+	EpochEvents = [ //[year,month,day of month, minutes,name of file - .sqf] If minutes is set to -1, the event will run once immediately after server start.
+		//["any","any","any","any",-1,"Infected_Camps"], // (negatively impacts FPS)
+		["any","any","any","any",-1,"Care_Packages"],
+		["any","any","any","any",-1,"CrashSites"],
+		["any","any","any","any",0,"building_supplies"],
+		["any","any","any","any",15,"pirate_treasure"],
+		["any","any","any","any",30,"pirate_treasure"],
+		["any","any","any","any",45,"un_supply"]
+	];
 	```
 	
-	Replace it with this, if you have other events already, then just work these in:
-	
-	```sqf
-	EpochEvents = [["any","any","any","any",0,"building_supplies"],["any","any","any","any",15,"pirate_treasure"],["any","any","any","any",30,"special_forces"],["any","any","any","any",45,"un_supply"]];
-	```
-	Or you can call the event_init function and let it select a random mission. If you are not running all of the events, then open event_init.sqf and comment out the line that corresponds with the mission in the array. The last line should not have a comma behind it.
-	
-	```sqf
-	EpochEvents = [["any","any","any","any",0,"event_init"],["any","any","any","any",15,"event_init"],["any","any","any","any",30,"event_init"],["any","any","any","any",45,"event_init"]];
-	
-9. Copy the ***dayz_code*** folder over to your mission folder.
-10. This mod is dependent on the Epoch community stringtable. Download the stringtable ***[here](https://github.com/oiad/communityLocalizations/)*** and place file stringTable.xml in the root of your mission folder.
-11. Repack your mission PBO.
+	You can edit file event_init.sqf to run only the events that you want.
+9. Repack your mission PBO.
 
 Configuration Notes:
 At the top of each file you will find a section that looks like this:
