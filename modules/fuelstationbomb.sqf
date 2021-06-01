@@ -1,27 +1,27 @@
 /*
 	Fuel Station Bombing event by JasonTM
 	Credit to juandayz for original "Random Explosions on Gas Stations" event.
-	Last edited 3-6-2019
+	Updated to work with DayZ Epoch 1.0.7
+	Last edited 6-1-2021
+	***As of now, this event only has gas station positions for Chernarus.
 */
 
-private ["_random","_pos","_vMarker"];
-
-_timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
-_delay = 2; // This is the time in minutes it will take for the explosion to occur after announcement
-_lowerGrass = true; // remove grass underneath loot so it is easier to find small objects
-_visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the vehicle.
-_distance = 20; // Distance from vehicle before event is considered "visited"
+local _timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
+local _delay = 2; // This is the time in minutes it will take for the explosion to occur after announcement
+local _lowerGrass = true; // remove grass underneath loot so it is easier to find small objects
+local _visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the vehicle.
+local _distance = 20; // Distance from vehicle before event is considered "visited"
 
 // You can adjust these loot selections to your liking. Must be magazine/item slot class name, not weapon or tool belt.
 // Nested arrays are number of each item and item class name.
-_lootArrays = [
+local _lootArrays = [
 	[[6,"full_cinder_wall_kit"],[1,"cinder_door_kit"],[1,"cinder_garage_kit"],[4,"forest_large_net_kit"]],
 	[[6,"metal_floor_kit"],[6,"ItemWoodFloor"],[2,"ItemWoodStairs"],[10,"ItemSandbag"]],
 	[[24,"CinderBlocks"],[8,"MortarBucket"]]
 ];
 
 // Select random loot array from above
-_loot = _lootArrays call BIS_fnc_selectRandom;
+local _loot = _lootArrays call BIS_fnc_selectRandom;
 
 // Initialize locations array
 if (isNil "FuelStationEventArray") then {
@@ -43,20 +43,22 @@ if (isNil "FuelStationEventArray") then {
 };
 
 // Don't spawn the event at a fuel station where a player is refueling/repairing a vehicle
-_validSpot = false;
+local _validSpot = false;
+local _random = [];
+local _pos = [0,0,0];
+
 while {!_validSpot} do {
 	_random = FuelStationEventArray call BIS_fnc_selectRandom;
 	_pos = _random select 1;
-	{if (isPlayer _x && _x distance _pos >= 20) then {_validSpot = true};} count playableUnits;
+	{if (isPlayer _x && _x distance _pos >= 100) then {_validSpot = true};} count playableUnits; // players are at least 100 meters away.
 };
 
-_dir = _random select 0;
-_name = _random select 2;
+local _dir = _random select 0;
+local _name = _random select 2;
 
 { // Remove current location from array so there are no repeats
 	if (_name == (_x select 2)) exitWith {
-		FuelStationEventArray set [_forEachIndex, "remove"];
-		FuelStationEventArray = FuelStationEventArray - ["remove"];
+		FuelStationEventArray = [FuelStationEventArray,_forEachIndex] call fnc_deleteAt;
 	};
 } forEach FuelStationEventArray;
 
@@ -66,7 +68,7 @@ if (count FuelStationEventArray == 0) then {FuelStationEventArray = nil;};
 [nil,nil,rTitleText,format["A bomb has been planted on a truck at the %1 fuel station\nIt will explode in %2 minutes", _name, _delay], "PLAIN",10] call RE;
 
 // Spawn truck
-_truck = "Ural_CDF" createVehicle _pos;
+local _truck = "Ural_CDF" createVehicle _pos;
 _truck setDir _dir;
 _truck setPos _pos;
 _truck setVehicleLock "locked";
@@ -74,20 +76,26 @@ _truck setVariable ["CharacterID","9999",true];
 
 // Disable damage to near fuel pumps so the explosion doesn't destroy them.
 // Otherwise players will complain about not being able to refuel and repair their vehicles.
-_pumps = nearestObjects [_pos, ["Land_A_FuelStation_Feed"], 30];
-if (count _pumps > 0) then {
-	{
-		_x allowDamage false;
-	} count _pumps;
-};
+{
+	_x allowDamage false;
+} count (_pos nearObjects ["Land_A_FuelStation_Feed", 30]);
 
-_time = diag_tickTime;
-_done = false;
-_visited = false;
-_isNear = true;
-_spawned = false;
-_lootArray = [];
-_grassArray = [];
+local _time = diag_tickTime;
+local _done = false;
+local _visited = false;
+local _isNear = true;
+local _spawned = false;
+local _lootArray = [];
+local _grassArray = [];
+local _marker = "";
+local _dot = "";
+local _vMarker = "";
+local _lootRad = 0;
+local _lootPos = [0,0,0];
+local _lootVeh = objNull;
+local _lootArray = [];
+local _grass = objNull;
+local _grassArray = [];
 
 // Start monitoring loop
 while {!_done} do {
