@@ -95,11 +95,17 @@ diag_log "Abandoned Safe Event Ended";
 /*
 	****Special Instructions****
 	Open server_monitor.sqf
+	
+	Find this line:
+	dayz_serverIDMonitor = [];
+	
+	Place this line below it:
+	DZE_LockedSafes = [];
+	
 	Find this line:
 	_isTrapItem = _object isKindOf "TrapItems";
 	
-	Place these 2 lines above it:
-	DZE_LockedSafes = [];
+	Place this line above it:
 	if (_type in ["VaultStorageLocked","VaultStorage2Locked","TallSafeLocked"]) then {DZE_LockedSafes set [count DZE_LockedSafes, _object];};
 
 	****Run this query on your database to reset the code of inactive safes to 0000.****
@@ -116,5 +122,4 @@ diag_log "Abandoned Safe Event Ended";
 	`Classname` IN ('VaultStorageLocked','VaultStorage2Locked','TallSafeLocked') AND
 	`Inventory` <> '[]' AND
 	`Inventory` IS NOT NULL
-
 */
