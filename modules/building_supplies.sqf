@@ -12,13 +12,13 @@ local _vaultChance = .25; // Chance that a safe or lockbox will be added to the 
 local _radius = 350; // Radius the loot can spawn and used for the marker.
 local _timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
 local _debug = false; // Diagnostic logs used for troubleshooting.
-local _nameMarker = false; // Center marker with the name of the mission.
+local _nameMarker = true; // Center marker with the name of the mission.
 local _markPos = false; // Puts a marker exactly were the loot spawns.
 local _lootAmount = 15; // This is the number of times a random loot selection is made.
 local _type = "TitleText"; // Type of announcement message. Options "Hint","TitleText". ***Warning: Hint appears in the same screen space as common debug monitors
-local _visitMarker = false; // Places a "visited" check mark on the mission if a player gets within range of the crate.
+local _visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the crate.
 local _distance = 20; // Distance in meters from crate before crate is considered "visited"
-local _crate = "USVehicleBox"; // Class name of loot crate.
+local _crate = "DZ_AmmoBoxBigUS"; // Class name of loot crate.
 #define TITLE_COLOR "#00FF11" // Hint Option: Color of Top Line
 #define TITLE_SIZE "1.75" // Hint Option: Size of top line
 #define IMAGE_SIZE "4" // Hint Option: Size of the image
@@ -84,52 +84,30 @@ local _time = diag_tickTime;
 local _done = false;
 local _visited = false;
 local _isNear = true;
-local  _marker = "";
-local  _dot = "";
-local  _vMarker = "";
-local  _pMarker = "";
+local _markers = [1,1,1,1];
+
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, format ["eventMark%1", _time], "ColorGreen", "","ELLIPSE", "", [_radius, _radius], [], 0.5]];
+if (_nameMarker) then {_markers set [1, [_pos, format ["eventDot%1",_time], "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_IKEA_TITLE"], 0]];};
+if (_markPos) then {_markers set [2, [_lootPos, format ["eventDebug%1",_time], "ColorGreen", "mil_dot","ICON", "", [], [], 0]];};
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
 while {!_done} do {
-	
-	_marker = createMarker [ format ["eventMark%1", _time], _pos];
-	_marker setMarkerShape "ELLIPSE";
-	_marker setMarkerColor "ColorGreen";
-	_marker setMarkerAlpha 0.5;
-	_marker setMarkerSize [_radius,_radius];
-	
-	if (_nameMarker) then {
-		_dot = createMarker [format["eventDot%1",_time],_pos];
-		_dot setMarkerShape "ICON";
-		_dot setMarkerType "mil_dot";
-		_dot setMarkerColor "ColorBlack";
-		_dot setMarkerText "IKEA supply";
-	};
-	
-	if (_markPos) then {
-		_pMarker = createMarker [format["eventDebug%1",_time],_lootPos];
-		_pMarker setMarkerShape "ICON";
-		_pMarker setMarkerType "mil_dot";
-		_pMarker setMarkerColor "ColorGreen";
-	};
-	
-	if (_visitMarker) then {
-		{if (isPlayer _x && _x distance _box <= _distance && !_visited) then {_visited = true};} count playableUnits;
-	
-		// Add the visit marker to the center of the mission if enabled
-		if (_visited) then {
-			_vMarker = createMarker [ format ["EventVisit%1", _time], [(_pos select 0), (_pos select 1) + 25]];
-			_vMarker setMarkerShape "ICON";
-			_vMarker setMarkerType "hd_pickup";
-			_vMarker setMarkerColor "ColorBlack";
-		}; 
-	};
-	
 	uiSleep 3;
-	
-	deleteMarker _marker;
-	if !(isNil "_dot") then {deleteMarker _dot;};
-	if !(isNil "_pMarker") then {deleteMarker _pMarker;};
-	if !(isNil "_vMarker") then {deleteMarker _vMarker;}; 
+	if (_visitMark && !_visited) then {
+		{
+			if (isPlayer _x && {_x distance _box <= _distance}) exitWith {
+				_visited = true;
+				_markers set [3, [[(_pos select 0), (_pos select 1) + 25], format ["EventVisit%1", _time], "ColorBlack", "hd_pickup","ICON", "", [], [], 0]];
+				DZE_ServerMarkerArray set [_markerIndex, _markers];
+				PVDZ_ServerMarkerSend = ["createSingle",(_markers select 3)];
+				publicVariable "PVDZ_ServerMarkerSend";
+			};
+		} count playableUnits;
+	};
 	
 	if (_timeout != -1) then {
 		if (diag_tickTime - _time >= _timeout*60) then {
@@ -139,10 +117,20 @@ while {!_done} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) then {_isNear = false};} count playableUnits;
+	uiSleep 3;
+	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
 };
 
 // Clean up
 deleteVehicle _box;
-
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	if (typeName _x == "ARRAY") then {
+		_remove set [count _remove, (_x select 1)];
+	};
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 diag_log "IKEA Event Ended";

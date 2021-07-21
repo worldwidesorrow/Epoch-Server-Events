@@ -7,7 +7,7 @@
 
 local _spawnChance =  1; // Percentage chance of event happening.The number must be between 0 and 1. 1 = 100% chance.
 local _numGems = [0,1]; // Random number of gems to add to the crate [minimum, maximum]. For no gems, set to [0,0].
-local _markerRadius = 200; // Radius the loot can spawn and used for the marker
+local _radius = 250; // Radius the loot can spawn and used for the marker
 local _timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
 local _debug = false; // Diagnostic logs used for troubleshooting.
 local _nameMarker = true; // Center marker with the name of the mission.
@@ -137,51 +137,30 @@ local _time = diag_tickTime;
 local _finished = false;
 local _visited = false;
 local _isNear = true;
-local _marker = "";
-local _dot = "";
-local _pMarker = "";
-local _vMarker = "";
+local _markers = [1,1,1,1];
+
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, format ["eventMark%1", _time], "ColorYellow", "","ELLIPSE", "", [_radius, _radius], [], 0.5]];
+if (_nameMarker) then {_markers set [1, [_pos, format ["eventDot%1",_time], "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_LABYRINTH_TITLE"], 0]];};
+if (_markPos) then {_markers set [2, [_lootPos, format ["eventDebug%1",_time], "ColorYellow", "mil_dot","ICON", "", [], [], 0]];};
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
 while {!_finished} do {
-	
-	_marker = createMarker [ format ["eventmarker%1", _time], _pos];
-	_marker setMarkerShape "ELLIPSE";
-	_marker setMarkerColor "ColorYellow";
-	_marker setMarkerAlpha 0.5;
-	_marker setMarkerSize [(_markerRadius + 50), (_markerRadius + 50)];
-	
-	if (_nameMarker) then {
-		_dot = createMarker [format["eventDot%1",_time],_pos];
-		_dot setMarkerShape "ICON";
-		_dot setMarkerType "mil_dot";
-		_dot setMarkerColor "ColorBlack";
-		_dot setMarkerText "Labyrinth";
-	};
-	
-	if (_markPos) then {
-		_pMarker = createMarker [ format ["eventPos%1", _time], _lootPos];
-		_pMarker setMarkerShape "ICON";
-		_pMarker setMarkerType "mil_dot";
-		_pMarker setMarkerColor "ColorYellow";
-	};
-	
-	if (_visitMark) then {
-		{if (isPlayer _x && _x distance _box <= _distance && !_visited) then {_visited = true};} count playableUnits;
-	
-		if (_visited) then {
-			_vMarker = createMarker [ format ["eventVisit%1", _time], [(_pos select 0), (_pos select 1) + 25]];
-			_vMarker setMarkerShape "ICON";
-			_vMarker setMarkerType "hd_pickup";
-			_vMarker setMarkerColor "ColorBlack";
-		};
-	};
-	
 	uiSleep 3;
-	
-	deleteMarker _marker;
-	if !(isNil "_dot") then {deleteMarker _dot;};
-	if !(isNil "_pMarker") then {deleteMarker _pMarker;};
-	if !(isNil "_vMarker") then {deleteMarker _vMarker;}; 
+	if (_visitMark && !_visited) then {
+		{
+			if (isPlayer _x && {_x distance _box <= _distance}) exitWith {
+				_visited = true;
+				_markers set [3, [[(_pos select 0), (_pos select 1) + 25], format ["EventVisit%1", _time], "ColorBlack", "hd_pickup","ICON", "", [], [], 0]];
+				PVDZ_ServerMarkerSend = ["createSingle",(_markers select 3)];
+				publicVariable "PVDZ_ServerMarkerSend";
+				DZE_ServerMarkerArray set [_markerIndex, _markers];
+			};
+		} count playableUnits;
+	};
 	
 	if (_timeout != -1) then {
 		if (diag_tickTime - _time >= _timeout*60) then {
@@ -191,15 +170,24 @@ while {!_finished} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) then {_isNear = false};} count playableUnits;
+	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
 };
 
-deleteVehicle _box;
-deleteVehicle _clutter;
-
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	if (typeName _x == "ARRAY") then {
+		_remove set [count _remove, (_x select 1)];
+	};
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 {
 	deleteVehicle _x;
 } count _objects;
+deleteVehicle _box;
+deleteVehicle _clutter;
 
 diag_log "Labyrinth Event Ended";
 

@@ -156,50 +156,30 @@ local _time = diag_tickTime;
 local _finished = false;
 local _visited = false;
 local _isNear = true;
-local _marker = "";
-local _dot = "";
-local _pMarker = "";
-local _vMarker = "";
+local _markers = [1,1,1,1];
+
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, format ["eventMark%1", _time], "ColorOrange", "","ELLIPSE", "", [(_radius + 50), (_radius + 50)], [], 0.5]];
+if (_nameMarker) then {_markers set [1, [_pos, format ["eventDot%1",_time], "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_RUBBLETOWN_TITLE"], 0]];};
+if (_markPos) then {_markers set [2, [_lootPos, format ["eventDebug%1",_time], "ColorOrange", "mil_dot","ICON", "", [], [], 0]];};
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
 while {!_finished} do {
-	_marker = createMarker [ format ["eventMarker%1", _time], _pos];
-	_marker setMarkerShape "ELLIPSE";
-	_marker setMarkerColor "ColorOrange";
-	_marker setMarkerAlpha 0.5;
-	_marker setMarkerSize [(_radius + 50), (_radius + 50)];
-	
-	if (_nameMarker) then {
-		_dot = createMarker [format["eventDot%1",_time],_pos];
-		_dot setMarkerShape "ICON";
-		_dot setMarkerType "mil_dot";
-		_dot setMarkerColor "ColorBlack";
-		_dot setMarkerText "Rubble Town";
-	};
-	
-	if (_markPos) then {
-		_pMarker = createMarker [ format ["eventPos%1", _time], _lootPos];
-		_pMarker setMarkerShape "ICON";
-		_pMarker setMarkerType "mil_dot";
-		_pMarker setMarkerColor "ColorOrange";
-	};
-	
-	if (_visitMark) then {
-		{if (isPlayer _x && _x distance _box <= _visitDistance && !_visited) then {_visited = true};} count playableUnits;
-	
-		if (_visited) then {
-			_vMarker = createMarker [ format ["eventVisit%1", _time], [(_pos select 0), (_pos select 1) + 25]];
-			_vMarker setMarkerShape "ICON";
-			_vMarker setMarkerType "hd_pickup";
-			_vMarker setMarkerColor "ColorBlack";
-		}; 
-	};
-	
 	uiSleep 3;
-	
-	deleteMarker _marker;
-	if !(isNil "_dot") then {deleteMarker _dot;};
-	if !(isNil "_pMarker") then {deleteMarker _pMarker;};
-	if !(isNil "_vMarker") then {deleteMarker _vMarker;}; 
+	if (_visitMark && !_visited) then {
+		{
+			if (isPlayer _x && {_x distance _box <= _distance}) exitWith {
+				_visited = true;
+				_markers set [3, [[(_pos select 0), (_pos select 1) + 25], format ["EventVisit%1", _time], "ColorBlack", "hd_pickup","ICON", "", [], [], 0]];
+				PVDZ_ServerMarkerSend = ["createSingle",(_markers select 3)];
+				publicVariable "PVDZ_ServerMarkerSend";
+				DZE_ServerMarkerArray set [_markerIndex, _markers];
+			};
+		} count playableUnits;
+	};
 	
 	if (_timeout != -1) then {
 		if (diag_tickTime - _time >= _timeout*60) then {
@@ -209,11 +189,21 @@ while {!_finished} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _visitDistance) then {_isNear = false};} count playableUnits;
+	{if (isPlayer _x && _x distance _box >= _visitDistance) exitWith {_isNear = false};} count playableUnits;
 };
 
 deleteVehicle _box;
 deleteVehicle _clutter;
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	if (typeName _x == "ARRAY") then {
+		_remove set [count _remove, (_x select 1)];
+	};
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 
 {
 	deleteVehicle _x;

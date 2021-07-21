@@ -7,13 +7,15 @@
 ### Installation Instructions
 
 1. Click ***[Clone or Download](https://github.com/worldwidesorrow/Epoch-Server-Events/archive/master.zip)*** the green button on the right side of the Github page.
-2. Extract the downloaded folder to your desktop and open it
-3. Go to your server pbo and unpack it.
-4. Navigate to the new ***dayz_server*** folder and copy the ***modules*** folder into this directory.
-5. Open each of the files and make adjustments to the configuration variables at the top to meet your preferences.
-6. Save the file and repack your server PBO
-7. Unpack your mission PBO
-8. Edit ***init.sqf***
+2. This mod is dependent on the Client Side Marker Manager. Download it ***[here](https://github.com/worldwidesorrow/Client-Side-Marker-Manager/)*** and install it according to the instructions.
+3. This mod is dependent on the Epoch community stringtable. Download the stringtable ***[here](https://github.com/oiad/communityLocalizations/)*** and place file stringTable.xml in the root of your mission folder.
+4. Extract the downloaded folder to your desktop and open it
+5. Go to your server pbo and unpack it.
+6. Navigate to the new ***dayz_server*** folder and copy the ***modules*** folder into this directory.
+7. Open each of the files and make adjustments to the configuration variables at the top to meet your preferences.
+8. Save the file and repack your server PBO
+9. Unpack your mission PBO
+10. Edit ***init.sqf***
 
 	Find this block of code:
 	
@@ -56,7 +58,7 @@
 	```
 	
 	You can edit file event_init.sqf to run only the events that you want.
-9. Repack your mission PBO.
+11. Repack your mission PBO.
 
 Configuration Notes:
 At the top of each file you will find a section that looks like this:

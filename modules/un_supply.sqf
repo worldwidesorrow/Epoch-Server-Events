@@ -11,13 +11,13 @@ local _vaultChance = .25; // Percentage chance of safe or lockbox being added to
 local _radius = 350; // Radius the loot can spawn and used for the marker
 local _debug = false; // Diagnostic logs used for troubleshooting.
 local _nameMarker = false; // Center marker with the name of the mission.
-local _timeout = 20; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
-local _markPos = false; // Puts a marker exactly were the loot spawns.
+local _timeout = 3; // Time it takes for the event to time out (in minutes). To disable timeout set to -1.
+local _markPos = true; // Puts a marker exactly were the loot spawns.
 local _lootAmount = 50; // This is the number of times a random loot selection is made.
 local _type = "TitleText"; // Type of announcement message. Options "Hint","TitleText". ***Warning: Hint appears in the same screen space as common debug monitors
 local _visitMark = false; // Places a "visited" check mark on the mission if a player gets within range of the crate.
 local _distance = 20; // Distance from crate before crate is considered "visited"
-local _crate = "USVehicleBox"; // Class name of loot crate.
+local _crate = "DZ_AmmoBoxBigUS"; // Class name of loot crate.
 #define TITLE_COLOR "#0D00FF" // Hint Option: Color of Top Line
 #define TITLE_SIZE "1.75" // Hint Option: Size of top line
 #define IMAGE_SIZE "4" // Hint Option: Size of the image
@@ -25,11 +25,11 @@ local _crate = "USVehicleBox"; // Class name of loot crate.
 local _bloodbag = ["bloodBagONEG","ItemBloodbag"] select dayz_classicBloodBagSystem;
 
 local _lootList = [
-	_bloodbag,"ItemBandage","ItemAntibiotic","ItemEpinephrine","ItemMorphine","ItemPainkiller","ItemAntibacterialWipe","ItemHeatPack","ItemKiloHemp", // meds
-	"Skin_Camo1_DZ","Skin_CZ_Soldier_Sniper_EP1_DZ","Skin_CZ_Special_Forces_GL_DES_EP1_DZ","Skin_Drake_Light_DZ","Skin_FR_OHara_DZ","Skin_FR_Rodriguez_DZ","Skin_Graves_Light_DZ","Skin_Sniper1_DZ","Skin_Soldier1_DZ","Skin_Soldier_Bodyguard_AA12_PMC_DZ", // skins
-	"ItemSodaSmasht","ItemSodaClays","ItemSodaR4z0r","ItemSodaPepsi","ItemSodaCoke","FoodCanBakedBeans","FoodCanPasta","FoodCanSardines","FoodMRE","ItemWaterBottleBoiled","ItemSodaRbull","FoodBeefCooked","FoodMuttonCooked","FoodChickenCooked","FoodRabbitCooked","FoodBaconCooked","FoodGoatCooked","FoodDogCooked","FishCookedTrout","FishCookedSeaBass","FishCookedTuna", // food
+	"ItemAntibiotic3","ItemEpinephrine","ItemHeatPack","ItemMorphine","ItemBandage","ItemAntibacterialWipe","ItemPainkiller6","ItemSepsisBandage","equip_woodensplint","ItemKiloHemp",_bloodbag, // meds
+	"FoodCanBakedBeans","FoodCanFrankBeans","FoodCanPasta","FoodCanSardines","FoodCanBeef","FoodCanPotatoes","FoodCanGriff","FoodCanBadguy","FoodCanBoneboy","FoodCanCorn","FoodCanCurgon","FoodCanDemon","FoodCanFraggleos","FoodCanHerpy","FoodCanDerpy","FoodCanOrlok","FoodCanPowell","FoodCanTylers","FoodCanUnlabeled","FoodCanRusUnlabeled","FoodCanRusStew","FoodCanRusPork","FoodCanRusPeas","FoodCanRusMilk","FoodCanRusCorn","FoodChipsSulahoops","FoodChipsMysticales","FoodChipsChocolate","FoodCandyChubby","FoodCandyAnders","FoodCandyLegacys","FoodCakeCremeCakeClean","FoodCandyMintception","FoodPistachio","FoodNutmix","FoodMRE","FoodbaconCooked","FoodbeefCooked","FoodchickenCooked","FoodGoatCooked","FoodmuttonCooked","FoodrabbitCooked","FishCookedTrout","FishCookedSeaBass","FishCookedTuna", // food
+	"ItemSodaCoke","ItemSodaPepsi","ItemSodaMdew","ItemSodaMtngreen","ItemSodaR4z0r","ItemSodaClays","ItemSodaSmasht","ItemSodaDrwaste","ItemSodaFranka","ItemSodaLemonade","ItemSodaLirik","ItemSodaLvg","ItemSodaMzly","ItemSodaPeppsy","ItemSodaRabbit","ItemSodaSacrite","ItemSodaRocketFuel","ItemSodaGrapeDrink","ItemSherbet","ItemSodaRbull","ItemSodaOrangeSherbet","ItemWaterbottle","ItemWaterBottleSafe","ItemWaterBottleBoiled","ItemWaterBottleHerbal","ItemPlasticWaterBottleSafe","ItemPlasticWaterBottleBoiled","ItemPlasticWaterBottleHerbal", // drink
 	"PartFueltank","PartWheel","PartEngine","PartGlass","PartGeneric","PartVRotor","ItemJerrycan","ItemFuelBarrel","equip_hose", // vehicle parts
-	"ItemDesertTent","ItemDomeTent","ItemTent"// tents
+	"ItemCanvas","ItemTent","ItemTentWinter","ItemDomeTent","ItemWinterDomeTent","ItemDesertTent","equip_floppywire","equip_scrapelectronics","equip_rope","equip_tent_poles" // tents and stuff
 ];
 
 local _tools = ["ItemToolbox","ItemToolbox","ItemKnife","ItemEtool","ItemGPS","Binocular_Vector","NVGoggles_DZE","ItemHatchet","ItemCrowbar","ItemSledge"];
@@ -40,7 +40,7 @@ local _pos = [getMarkerPos "center",0,(((getMarkerSize "center") select 1)*0.75)
 
 diag_log format["UN Supply Drop Event spawning at %1", _pos];
 
-local _lootPos = [_pos,0,(_radius - 100),10,0,2000,0] call BIS_fnc_findSafePos;
+local _lootPos = [_pos,0,(_radius * .75),10,0,2000,0] call BIS_fnc_findSafePos;
 
 if (_debug) then {diag_log format["UN Supply Drop: creating ammo box at %1", _lootPos];};
 
@@ -81,51 +81,30 @@ local _time = diag_tickTime;
 local _done = false;
 local _visited = false;
 local _isNear = true;
-local _marker = "";
-local _dot = "";
-local _pMarker = "";
-local _vMarker = "";
+local _markers = [1,1,1,1];
+
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, format ["eventMark%1", _time], "ColorBlue", "","ELLIPSE", "", [_radius, _radius], [], 0.5]];
+if (_nameMarker) then {_markers set [1, [_pos, format ["eventDot%1",_time], "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_UNSUPPLY_TITLE"], 0]];};
+if (_markPos) then {_markers set [2, [_lootPos, format ["eventDebug%1",_time], "ColorBlue", "mil_dot","ICON", "", [], [], 0]];};
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
 while {!_done} do {
-	
-	_marker = createMarker [ format ["eventMark%1", _time], _pos];
-	_marker setMarkerShape "ELLIPSE";
-	_marker setMarkerColor "ColorBlue";
-	_marker setMarkerAlpha 0.5;
-	_marker setMarkerSize [(_radius + 50), (_radius + 50)];
-	
-	if (_nameMarker) then {
-		_dot = createMarker [format["eventDot%1",_time],_pos];
-		_dot setMarkerShape "ICON";
-		_dot setMarkerType "mil_dot";
-		_dot setMarkerColor "ColorBlack";
-		_dot setMarkerText "UN Supply Drop";
+	uiSleep 3;
+	if (_visitMark && !_visited) then {
+		{
+			if (isPlayer _x && {_x distance _box <= _distance}) exitWith {
+				_visited = true;
+				_markers set [3, [[(_pos select 0), (_pos select 1) + 25], format ["EventVisit%1", _time], "ColorBlack", "hd_pickup","ICON", "", [], [], 0]];
+				PVDZ_ServerMarkerSend = ["createSingle",(_markers select 3)];
+				publicVariable "PVDZ_ServerMarkerSend";
+				DZE_ServerMarkerArray set [_markerIndex, _markers];
+			};
+		} count playableUnits;
 	};
-	
-	if (_markPos) then {
-		_pMarker = createMarker [format["eventDebug%1",_time],_lootPos];
-		_pMarker setMarkerShape "ICON";
-		_pMarker setMarkerType "mil_dot";
-		_pMarker setMarkerColor "ColorBlue";
-	};
-	
-	if (_visitMark) then {
-		{if (isPlayer _x && _x distance _box <= _distance && !_visited) then {_visited = true};} count playableUnits;
-	
-		if (_visited) then {
-			_vMarker = createMarker [ format ["eventVisit%1", _time], [(_pos select 0), (_pos select 1) + 25]];
-			_vMarker setMarkerShape "ICON";
-			_vMarker setMarkerType "hd_pickup";
-			_vMarker setMarkerColor "ColorBlack";
-		}; 
-	};
-	
-	uiSleep 1;
-	
-	deleteMarker _marker;
-	if !(isNil "_dot") then {deleteMarker _dot;};
-	if !(isNil "_pMarker") then {deleteMarker _pMarker;};
-	if !(isNil "_vMarker") then {deleteMarker _vMarker;};
 	
 	if (_timeout != -1) then {
 		if (diag_tickTime - _time >= _timeout*60) then {
@@ -135,9 +114,19 @@ while {!_done} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) then {_isNear = false};} count playableUnits;
+	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
 };
 
 deleteVehicle _box;
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	if (typeName _x == "ARRAY") then {
+		_remove set [count _remove, (_x select 1)];
+	};
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 
 diag_log "EVENT: U.N. Supply Crate Ended";

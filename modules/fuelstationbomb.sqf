@@ -11,13 +11,27 @@ local _delay = 2; // This is the time in minutes it will take for the explosion 
 local _lowerGrass = true; // remove grass underneath loot so it is easier to find small objects
 local _visitMark = true; // Places a "visited" check mark on the mission if a player gets within range of the vehicle.
 local _distance = 20; // Distance from vehicle before event is considered "visited"
+local _nameMarker = true; // Center marker with the name of the mission.
+local _type = "Hint"; // Type of announcement message. Options "Hint","TitleText". ***Warning: Hint appears in the same screen space as common debug monitors
+#define TITLE_COLOR "#ff9933" // Hint Option: Color of Top Line
+#define TITLE_SIZE "1.75" // Hint Option: Size of top line
 
 // You can adjust these loot selections to your liking. Must be magazine/item slot class name, not weapon or tool belt.
 // Nested arrays are number of each item and item class name.
+/*
 local _lootArrays = [
 	[[6,"full_cinder_wall_kit"],[1,"cinder_door_kit"],[1,"cinder_garage_kit"],[4,"forest_large_net_kit"]],
 	[[6,"metal_floor_kit"],[6,"ItemWoodFloor"],[2,"ItemWoodStairs"],[10,"ItemSandbag"]],
 	[[24,"CinderBlocks"],[8,"MortarBucket"]]
+];
+*/
+
+// Vehicle Upgrade kits
+local _lootArrays = [
+/*Truck*/		[["ItemTruckORP",1],["ItemTruckAVE",1],["ItemTruckLRK",1],["ItemTruckTNK",1],["PartEngine",2],["PartWheel",6],["ItemScrews",8],["PartGeneric",10],["equip_metal_sheet",5],["ItemWoodCrateKit",2],["PartFueltank",3],["ItemGunRackKit",2],["ItemFuelBarrel",2]],
+/*Vehicle*/		[["ItemORP",1],["ItemAVE",1],["ItemLRK",1],["ItemTNK",1],["PartEngine",2],["PartWheel",4],["ItemScrews",8],["equip_metal_sheet",6],["PartGeneric",8],["ItemWoodCrateKit",2],["ItemGunRackKit",2],["PartFueltank",2],["ItemFuelBarrel",1]],
+/*Helicopter*/	[["ItemHeliAVE",1],["ItemHeliLRK",1],["ItemHeliTNK",1],["equip_metal_sheet",5],["ItemScrews",2],["ItemTinBar",3],["equip_scrapelectronics",5],["equip_floppywire",5],["PartGeneric",4],["ItemWoodCrateKit",1],["ItemGunRackKit",1],["ItemFuelBarrel",1]],
+/*Tank-APC*/	[["ItemTankORP",1],["ItemTankAVE",1],["ItemTankLRK",1],["ItemTankTNK",1],["PartEngine",6],["PartGeneric",6],["ItemScrews",6],["equip_metal_sheet",8],["ItemWoodCrateKit",2],["ItemGunRackKit",2],["PartFueltank",6],["ItemFuelBarrel",4]]
 ];
 
 // Select random loot array from above
@@ -65,7 +79,12 @@ local _name = _random select 2;
 // If all locations have been removed, reset to original array by destroying global variable
 if (count FuelStationEventArray == 0) then {FuelStationEventArray = nil;};
 
-[nil,nil,rTitleText,format["A bomb has been planted on a truck at the %1 fuel station\nIt will explode in %2 minutes", _name, _delay], "PLAIN",10] call RE;
+if (_type == "Hint") then {
+	RemoteMessage = ["hintNoImage",["STR_CL_ESE_FUELBOMB_TITLE",["STR_CL_ESE_FUELBOMB_START", _name, _delay]],[TITLE_COLOR,TITLE_SIZE]];
+} else {
+	RemoteMessage = ["titleText",["STR_CL_ESE_FUELBOMB_START", _name, _delay]];
+};
+publicVariable "RemoteMessage";
 
 // Spawn truck
 local _truck = "Ural_CDF" createVehicle _pos;
@@ -87,63 +106,51 @@ local _isNear = true;
 local _spawned = false;
 local _lootArray = [];
 local _grassArray = [];
-local _marker = "";
-local _dot = "";
-local _vMarker = "";
 local _lootRad = 0;
 local _lootPos = [0,0,0];
 local _lootVeh = objNull;
 local _lootArray = [];
 local _grass = objNull;
 local _grassArray = [];
+local _markers = [1,1,1];
+
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, "fuel" + str _time, "ColorRed", "","ELLIPSE", "", [150,150], [], 0.4]];
+if (_nameMarker) then {_markers set [1, [_pos, "explosion" + str _time, "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_FUELBOMB_TITLE"], 0]];};
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
 // Start monitoring loop
 while {!_done} do {
-	
-	_marker = createMarker ["fuel" + str _time,_pos];
-	_marker setMarkerShape "ELLIPSE";
-	_marker setMarkerColor "ColorRed";
-	_marker setMarkerAlpha 0.4;
-	_marker setMarkerSize [150,150];
-	
-	_dot = createMarker ["explosion" + str _time, _pos];
-	_dot setMarkerShape "ICON";
-	_dot setMarkerType "mil_dot";
-	_dot setMarkerColor "ColorBlack";
-	_dot setMarkerText "Fuel Station Explosion";
-	
-	if (_visitMark) then {
-		if (!_visited) then {
-			{
-				if (isPlayer _x && _x distance _pos <= _distance) then {
-					_visited = true;
-				};
-			} count playableUnits;
-		};
-	
-		if (_visited) then {
-			_vMarker = createMarker ["fuelVmarker" + str _time, [(_pos select 0), (_pos select 1) + 25]];
-			_vMarker setMarkerShape "ICON";
-			_vMarker setMarkerType "hd_pickup";
-			_vMarker setMarkerColor "ColorBlack";
-		}; 
+	uiSleep 3;
+	if (_visitMark && !_visited) then {
+		{
+			if (isPlayer _x && {_x distance _pos <= _distance}) exitWith {
+				_visited = true;
+				_markers set [2, [[(_pos select 0), (_pos select 1) + 25], "fuelVmarker" + str _time, "ColorBlack", "hd_pickup","ICON", "", [], [], 0]];
+				PVDZ_ServerMarkerSend = ["createSingle",(_markers select 2)];
+				publicVariable "PVDZ_ServerMarkerSend";
+				DZE_ServerMarkerArray set [_markerIndex, _markers];
+			};
+		} count playableUnits;
 	};
 	
-	uiSleep 3;
-	
-	deleteMarker _marker;
-	deleteMarker _dot;
-	if !(isNil "_vMarker") then {deleteMarker _vMarker;};
-	
 	if (!_spawned && {diag_tickTime - _time >= _delay*60}) then {
-		
-		[nil,nil,rTitleText,format["Explosion at the %1 fuel station!\nRecover the building supplies!",_name], "PLAIN",10] call RE;
+		if (_type == "Hint") then {
+			RemoteMessage = ["hintNoImage",["STR_CL_ESE_FUELBOMB_TITLE",["STR_CL_ESE_FUELBOMB_END",_name]],[TITLE_COLOR,TITLE_SIZE]];
+		} else {
+			RemoteMessage = ["titleText",["STR_CL_ESE_FUELBOMB_END",_name]];
+		};
+		publicVariable "RemoteMessage";
 		
 		// Blow the vehicle up
 		"Bo_GBU12_LGB" createVehicle _pos;
 		
 		uiSleep 2;
 		
+		/*
 		// Spawn loot around the destroyed vehicle
 		{
 			for "_i" from 1 to (_x select 0) do {
@@ -153,6 +160,24 @@ while {!_done} do {
 				_lootVeh = createVehicle ["WeaponHolder", _lootPos, [], 0, "CAN_COLLIDE"];
 				_lootVeh setVariable ["permaLoot", true];
 				_lootVeh addMagazineCargoGlobal [(_x select 1), 1];
+				_lootArray set[count _lootArray, _lootVeh];
+				if (_lowerGrass) then {
+					_grass = createVehicle ["ClutterCutter_small_2_EP1", _lootPos, [], 0, "CAN_COLLIDE"];
+					_grassArray set[count _grassArray, _grass];
+				};
+			};
+		} count _loot;
+		*/
+		
+		// Spawn loot around the destroyed vehicle
+		{
+			for "_i" from 1 to (_x select 1) do {
+				_lootRad = (random 10) + 4;
+				_lootPos = [_pos, _lootRad, random 360] call BIS_fnc_relPos;
+				_lootPos set [2, 0];
+				_lootVeh = createVehicle ["WeaponHolder", _lootPos, [], 0, "CAN_COLLIDE"];
+				_lootVeh setVariable ["permaLoot", true];
+				_lootVeh addMagazineCargoGlobal [(_x select 0), 1];
 				_lootArray set[count _lootArray, _lootVeh];
 				if (_lowerGrass) then {
 					_grass = createVehicle ["ClutterCutter_small_2_EP1", _lootPos, [], 0, "CAN_COLLIDE"];
@@ -176,8 +201,19 @@ while {!_done} do {
 
 // If player is near, don't delete the loot piles
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _pos >= 30) then {_isNear = false};} count playableUnits;
+	{if (isPlayer _x && _x distance _pos >= 30) exitWith {_isNear = false};} count playableUnits;
 };
+
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	if (typeName _x == "ARRAY") then {
+		_remove set [count _remove, (_x select 1)];
+	};
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 
 // Delete loot piles and grass cutters
 {deleteVehicle _x;} count _lootArray;

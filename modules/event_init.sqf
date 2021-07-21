@@ -2,7 +2,7 @@ local _cycle = true; // If this is set to true, then the missions will not repea
 
 if (isNil "Server_Events_Array") then {
 	Server_Events_Array = [
-		//"animated_crash_spawner",
+		"animated_crash_spawner",
 		"building_supplies",
 		"pirate_treasure",
 		"special_forces",
@@ -10,7 +10,8 @@ if (isNil "Server_Events_Array") then {
 		"labyrinth",
 		"rubble_town",
 		"abandoned_vaults",
-		"fuelstationbomb"
+		"fuelstationbomb",
+		"mechanics_truck"
 	];
 };
 

@@ -50,6 +50,7 @@ if (_debug) then {diag_log format["Abandoned Vault event setup, waiting for %1 m
 
 local _vault = _vaults call BIS_fnc_selectRandom;
 local _pos = [_vault] call FNC_GetPos;
+local _markers = [];
 
 if (_toGround) then {
 	if ((_pos select 2) > 2) then {
@@ -62,34 +63,24 @@ if (_toGround) then {
 
 if (_debug) then {diag_log format["Location of randomly picked 0000 vault = %1",_pos];};
 
-local _time = diag_tickTime;
-local _done = false;
-local _mark = "";
-local _dot = "";
+//[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
+_markers set [0, [_pos, format ["safemark_%1", diag_tickTime], "ColorKhaki", "","ELLIPSE", "", [_radius,_radius], [], 0]];
+_markers set [1, [_pos, format ["safedot_%1", diag_tickTime], "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_VAULT_TITLE"], 0]];
+DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
+local _markerIndex = count DZE_ServerMarkerArray - 1;
+PVDZ_ServerMarkerSend = ["start",_markers];
+publicVariable "PVDZ_ServerMarkerSend";
 
-while {!_done} do {
- 
-	_mark = createMarker [format ["safemark_%1", _time], _pos];
-	_mark setMarkerShape "ELLIPSE";
-	_mark setMarkerColor "ColorKhaki";
-	_mark setMarkerSize [_radius,_radius];
+uiSleep (_timeout*60);
 
-	_dot = createMarker [format ["safedot_%1", _time], _pos];
-	_dot setMarkerShape "ICON";
-	_dot setMarkerType "mil_dot";
-	_dot setMarkerColor "ColorBlack";
-	_dot setMarkerText "Abandoned Safe";
-	 
-	uiSleep 60;
-	
-	deleteMarker _mark;
-	deleteMarker _dot;
-	
-	if (diag_tickTime - _time >= _timeout*60) then {
-		_done = true;
-	};
-};
-
+// Tell all clients to remove the markers from the map
+local _remove = [];
+{
+	_remove set [count _remove, (_x select 1)];
+} count _markers;
+PVDZ_ServerMarkerSend = ["end",_remove];
+publicVariable "PVDZ_ServerMarkerSend";
+DZE_ServerMarkerArray set [_markerIndex, -1];
 diag_log "Abandoned Safe Event Ended";
 
 /*
