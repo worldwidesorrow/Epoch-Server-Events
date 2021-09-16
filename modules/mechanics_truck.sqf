@@ -152,7 +152,7 @@ local _markers = [1,1,1];
 
 //[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
 _markers set [0, [_pos, "MechanicsVeh" + str _time, "ColorBrown", "","ELLIPSE", "", [150,150], [], 0.7]];
-if (_nameMarker) then {_markers set [1, [_pos, "MechanicsVehDot" + str _time, "ColorBlack", "mil_dot","ICON", "", [], ["Mechanic's Vehicle"], 0]];};
+if (_nameMarker) then {_markers set [1, [_pos, "MechanicsVehDot" + str _time, "ColorBlack", "mil_dot","ICON", "", [], ["STR_CL_ESE_MECHANIC_TITLE"], 0]];};
 DZE_ServerMarkerArray set [count DZE_ServerMarkerArray, _markers]; // Markers added to global array for JIP player requests.
 local _markerIndex = count DZE_ServerMarkerArray - 1;
 PVDZ_ServerMarkerSend = ["start",_markers];
