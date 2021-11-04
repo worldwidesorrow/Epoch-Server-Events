@@ -16,7 +16,7 @@ local _lootAmount = 30; // This is the number of times a random loot selection i
 local _wepAmount = 4; // This is the number of times a random weapon selection is made.
 local _messageType = "TitleText"; // Type of announcement message. Options "Hint","TitleText". ***Warning: Hint appears in the same screen space as common debug monitors
 local _visitMark = false; // Places a "visited" check mark on the mission if a player gets within range of the crate.
-local _visitDistance = 20; // Distance from crate before crate is considered "visited"
+local _distance = 20; // Distance from crate before crate is considered "visited"
 local _crate = "GuerillaCacheBox";
 #define TITLE_COLOR "#ff9933" // Hint Option: Color of Top Line
 #define TITLE_SIZE "1.75" // Hint Option: Size of top line
@@ -189,7 +189,7 @@ while {!_finished} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _visitDistance) exitWith {_isNear = false};} count playableUnits;
+	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
 };
 
 deleteVehicle _box;
