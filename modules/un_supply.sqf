@@ -114,7 +114,9 @@ while {!_done} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
+	uiSleep 3;
+	_isNear = false;
+	{if (isPlayer _x && _x distance _box <= _distance) exitWith {_isNear = true;};} count playableUnits;
 };
 
 deleteVehicle _box;

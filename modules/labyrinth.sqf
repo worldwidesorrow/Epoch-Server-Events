@@ -170,7 +170,9 @@ while {!_finished} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
+	uiSleep 3;
+	_isNear = false;
+	{if (isPlayer _x && _x distance _box <= _distance) exitWith {_isNear = true;};} count playableUnits;
 };
 
 // Tell all clients to remove the markers from the map

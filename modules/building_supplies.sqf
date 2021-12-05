@@ -118,7 +118,8 @@ while {!_done} do {
 
 while {_isNear} do {
 	uiSleep 3;
-	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
+	_isNear = false;
+	{if (isPlayer _x && _x distance _box <= _distance) exitWith {_isNear = true;};} count playableUnits;
 };
 
 // Clean up
