@@ -156,6 +156,7 @@ local _time = diag_tickTime;
 local _finished = false;
 local _visited = false;
 local _isNear = true;
+local _foundPlayer = false;
 local _markers = [1,1,1,1];
 
 //[position,createMarker,setMarkerColor,setMarkerType,setMarkerShape,setMarkerBrush,setMarkerSize,setMarkerText,setMarkerAlpha]
@@ -189,7 +190,10 @@ while {!_finished} do {
 };
 
 while {_isNear} do {
-	{if (isPlayer _x && _x distance _box >= _distance) exitWith {_isNear = false};} count playableUnits;
+	_foundPlayer = false;
+	{if (isPlayer _x && _x distance _box <= _distance) exitWith {_foundPlayer = true;};} count playableUnits;
+	if (!_foundPlayer) then {_isNear = false;};
+	sleep 10;
 };
 
 deleteVehicle _box;
