@@ -22,15 +22,27 @@ if (random 1 > _spawnChance && !_debug) exitWith {};
 diag_log "Abandoned Safe Event Starting...";
 
 if ((count DZE_LockedSafes) < 1) exitWith {diag_log "There are no safes on the map.";};
+
+// If a player packs an abandoned vault it will remain in the DZE_LockedSafes array as object NULL. So they need to be removed.
+{
+	if (isNull _x) then {
+		DZE_LockedSafes = DZE_LockedSafes - [_x];
+	};
+} forEach DZE_LockedSafes;
+
 local _vaults = [];
-local _current = 0;
-local _code = 0;
+local _current = objNull;
+local _code = "0";
 
 for "_i" from 0 to (count DZE_LockedSafes)-1 do {
 	_current = DZE_LockedSafes select _i;
-	_code = _current getVariable ["CharacterID", "0"];
-	if (_code == "0000") then {
-		_vaults set [count _vaults, _current];
+	if !(isNull _current) then {
+		_code = _current getVariable ["CharacterID", "0"];
+		if (_code == "0000") then {
+			_vaults set [count _vaults, _current];
+		};
+	} else {
+		diag_log format ["[Abandoned Vaults] Safe at index %1 is null",_i];
 	};
 };
 
